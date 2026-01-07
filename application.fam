@@ -1,0 +1,15 @@
+App(
+    appid="rfid_scan_trans",
+    name="RFID Scan & Trans",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rfid_scan_trans_app",
+    requires=["gui", "storage"],
+    stack_size=4 * 1024,
+    fap_icon="rfid_scan_trans_10px.png",
+    fap_category="RFID",
+    fap_version=(1, 0),
+    fap_description="RFID scanner with signal storage, export, and transmission capabilities",
+    fap_author="shanklindarrell7-a11y",
+    fap_weburl="https://github.com/shanklindarrell7-a11y/RFID-SCAN-TRANS",
+    fap_icon_assets="icons",
+)
