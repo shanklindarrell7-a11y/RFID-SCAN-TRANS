@@ -279,7 +279,7 @@ class TransmissionController {
    * @private
    */
   _executeTransmission(signal, options) {
-    const transmissionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const transmissionId = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
     // Simulate transmission based on power level and signal
     const success = this._simulateTransmission(signal, options);

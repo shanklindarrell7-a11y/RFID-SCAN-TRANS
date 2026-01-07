@@ -255,7 +255,6 @@ class SignalDuplicator {
     // Simulated transmission
     // In real implementation, this would interface with hardware
     const powerLevel = options.powerLevel || 4;
-    console.log(`Transmitting ${signal.protocol} at power level ${powerLevel}`);
     return true;
   }
 

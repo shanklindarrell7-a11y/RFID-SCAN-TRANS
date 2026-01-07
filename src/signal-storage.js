@@ -208,7 +208,7 @@ class SignalStorage {
    * @private
    */
   _generateId() {
-    return `signal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `signal_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
@@ -218,7 +218,6 @@ class SignalStorage {
   _autoSave(id, signal) {
     // Simulated auto-save functionality
     // In real implementation, this would write to SD card
-    console.log(`Auto-saved signal: ${id}`);
   }
 }
 
