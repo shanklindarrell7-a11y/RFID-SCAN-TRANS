@@ -1,0 +1,23 @@
+App(
+    appid="rfid_sniffer",
+    name="RFID Sniffer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rfid_sniffer_app",
+    stack_size=2 * 1024,
+    fap_category="RFID",
+    fap_version="1.0.0",
+    fap_icon="rfid_sniffer_icon.png",
+    fap_description="Comprehensive RFID signal sniffer with capture, storage, and duplication features",
+    fap_author="@rfid-scan-trans",
+    fap_weburl="https://github.com/shanklindarrell7-a11y/RFID-SCAN-TRANS",
+    fap_icon_assets="icons",
+    requires=[
+        "gui",
+        "storage",
+        "notification",
+    ],
+    sources=[
+        "rfid_sniffer.c",
+        "signal_processor.c",
+    ],
+)
