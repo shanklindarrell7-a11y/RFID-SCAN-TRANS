@@ -13,4 +13,4 @@ Unauthorized RFID scanning, cloning, or transmission may violate:
 - Privacy laws
 - Computer fraud statutes
 - Trespassing laws
-- Corporate security policies 
+- Corporate security policies
