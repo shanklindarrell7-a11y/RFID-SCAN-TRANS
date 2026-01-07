@@ -3,6 +3,15 @@
 
 #define TAG "RFIDSniffer"
 
+// Protocol information table
+const ProtocolInfo protocol_info_table[RFIDProtocolCount] = {
+    {RFIDProtocolEM4100, "EM4100", 125, false},
+    {RFIDProtocolHIDProx, "HID Prox", 125, false},
+    {RFIDProtocolIndala, "Indala", 125, false},
+    {RFIDProtocolMifareClassic, "Mifare Classic", 13560, true},
+    {RFIDProtocolISO14443A, "ISO14443A", 13560, true},
+};
+
 // Protocol name getters
 const char* rfid_protocol_get_name(RFIDProtocol protocol) {
     if(protocol < RFIDProtocolCount) {

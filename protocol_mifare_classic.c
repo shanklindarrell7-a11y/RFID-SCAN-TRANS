@@ -52,8 +52,11 @@ bool mifare_classic_decode(const uint8_t* raw_data, size_t data_length, MifareCl
     // Extract ATQA if available
     if(data_length > out->uid_length + 1) {
         out->atqa[0] = raw_data[out->uid_length + 1];
-        out->atqa[1] = data_length > out->uid_length + 2 ? 
-                       raw_data[out->uid_length + 2] : 0;
+        if(data_length > out->uid_length + 2) {
+            out->atqa[1] = raw_data[out->uid_length + 2];
+        } else {
+            out->atqa[1] = 0;
+        }
     } else {
         out->atqa[0] = 0x04;
         out->atqa[1] = 0x00;

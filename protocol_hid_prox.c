@@ -18,7 +18,7 @@ uint8_t hid_prox_calc_even_parity(uint32_t data) {
 // Calculate odd parity for last 13 bits
 uint8_t hid_prox_calc_odd_parity(uint32_t data) {
     uint8_t parity = 1; // Start with 1 for odd parity
-    uint32_t mask = data & 0x1FFE000; // Bits 13-24
+    uint32_t mask = (data >> 13) & 0x1FFE; // Shift and mask to get bits 13-24
     
     while(mask) {
         parity ^= (mask & 1);

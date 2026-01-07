@@ -79,14 +79,8 @@ typedef struct {
     RFIDSnifferState* state;
 } RFIDSnifferApp;
 
-// Protocol information table
-static const ProtocolInfo protocol_info_table[RFIDProtocolCount] = {
-    {RFIDProtocolEM4100, "EM4100", 125, false},
-    {RFIDProtocolHIDProx, "HID Prox", 125, false},
-    {RFIDProtocolIndala, "Indala", 125, false},
-    {RFIDProtocolMifareClassic, "Mifare Classic", 13560, true},
-    {RFIDProtocolISO14443A, "ISO14443A", 13560, true},
-};
+// Protocol information table (defined in rfid_sniffer.c)
+extern const ProtocolInfo protocol_info_table[RFIDProtocolCount];
 
 // Function prototypes
 RFIDSnifferApp* rfid_sniffer_app_alloc(void);
