@@ -979,6 +979,8 @@ void rfid_reset_performance_metrics(void) {
 // ============================================================================
 
 uint8_t rfid_calculate_checksum(const uint8_t* data, uint16_t length) {
+    if (!data || length == 0) return 0;
+    
     uint8_t checksum = 0;
     for (uint16_t i = 0; i < length; i++) {
         checksum ^= data[i];
@@ -988,6 +990,7 @@ uint8_t rfid_calculate_checksum(const uint8_t* data, uint16_t length) {
 
 bool rfid_verify_signal(const RFIDSignal* signal) {
     if (!signal) return false;
+    if (signal->data_length > RFID_SIGNAL_MAX_LENGTH) return false;
     
     uint8_t calculated_checksum = rfid_calculate_checksum(signal->data, signal->data_length);
     return calculated_checksum == signal->checksum;
@@ -996,18 +999,27 @@ bool rfid_verify_signal(const RFIDSignal* signal) {
 void rfid_print_signal(const RFIDSignal* signal) {
     if (!signal) return;
     
+    // Validate data_length to prevent buffer overrun
+    uint16_t safe_length = signal->data_length;
+    if (safe_length > RFID_SIGNAL_MAX_LENGTH) {
+        safe_length = RFID_SIGNAL_MAX_LENGTH;
+    }
+    
     printf("Signal ID: %u\n", signal->id);
     printf("Timestamp: %llu\n", (unsigned long long)signal->timestamp);
     printf("Type: %d\n", signal->type);
     printf("Frequency: %u Hz\n", signal->frequency);
-    printf("Data Length: %u bytes\n", signal->data_length);
+    printf("Data Length: %u bytes\n", safe_length);
     printf("Checksum: 0x%02X\n", signal->checksum);
     printf("Tag: %s\n", signal->tag);
     printf("Data: ");
-    for (int i = 0; i < signal->data_length && i < 32; i++) {
+    
+    // Print first 32 bytes or less
+    uint16_t print_length = (safe_length < 32) ? safe_length : 32;
+    for (int i = 0; i < print_length; i++) {
         printf("%02X ", signal->data[i]);
     }
-    if (signal->data_length > 32) {
+    if (safe_length > 32) {
         printf("...");
     }
     printf("\n");
