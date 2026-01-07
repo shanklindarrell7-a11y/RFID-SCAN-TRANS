@@ -1,0 +1,35 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+rfid_example
+librfid_sniffer.a
+
+# Database files
+*.db
+*.db-wal
+*.db-shm
+
+# Export files
+export_*.json
+export_*.csv
+export_*.bin
+
+# Test files
+test_rfid.*
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+/tmp/
+*.tmp
