@@ -121,6 +121,7 @@ bool rfid_ringbuffer_push(RFIDRingBuffer* rb, const RFIDSignal* signal);
 bool rfid_ringbuffer_pop(RFIDRingBuffer* rb, RFIDSignal* signal);
 bool rfid_ringbuffer_is_empty(RFIDRingBuffer* rb);
 bool rfid_ringbuffer_is_full(RFIDRingBuffer* rb);
+uint32_t rfid_ringbuffer_get_capacity(RFIDRingBuffer* rb);
 
 // Database operations (optimized for large datasets)
 RFIDDatabase* rfid_db_open(const char* db_path);

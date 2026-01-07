@@ -25,7 +25,7 @@ void test_ringbuffer_performance(void) {
         return;
     }
     
-    printf("Ring buffer created with capacity: %u\n", rb->capacity);
+    printf("Ring buffer created with capacity: %u\n", rfid_ringbuffer_get_capacity(rb));
     
     // Performance test: push operations
     clock_t start = clock();

@@ -106,6 +106,11 @@ bool rfid_ringbuffer_pop(RFIDRingBuffer* rb, RFIDSignal* signal) {
     return true;
 }
 
+uint32_t rfid_ringbuffer_get_capacity(RFIDRingBuffer* rb) {
+    if (!rb) return 0;
+    return rb->capacity;
+}
+
 // ============================================================================
 // Database Operations with LRU Cache
 // ============================================================================
@@ -451,31 +456,36 @@ int rfid_db_get_signals_filtered(RFIDDatabase* db, const RFIDFilter* filter,
     
     // Build dynamic query based on filter using parameterized queries
     char query[2048] = "SELECT id, timestamp, type, frequency, data_length, data, checksum, tag FROM signals WHERE 1=1";
-    size_t query_len = strlen(query);
+    size_t remaining = sizeof(query) - strlen(query) - 1;
     int param_index = 1;
     
     if (filter) {
-        if (filter->use_type_filter && query_len + 20 < sizeof(query)) {
-            strncat(query, " AND type = ?", sizeof(query) - query_len - 1);
-            query_len = strlen(query);
+        if (filter->use_type_filter && remaining > 20) {
+            const char* clause = " AND type = ?";
+            strncat(query, clause, remaining);
+            remaining -= strlen(clause);
         }
-        if (filter->use_freq_filter && query_len + 35 < sizeof(query)) {
-            strncat(query, " AND frequency BETWEEN ? AND ?", sizeof(query) - query_len - 1);
-            query_len = strlen(query);
+        if (filter->use_freq_filter && remaining > 35) {
+            const char* clause = " AND frequency BETWEEN ? AND ?";
+            strncat(query, clause, remaining);
+            remaining -= strlen(clause);
         }
-        if (filter->use_time_filter && query_len + 35 < sizeof(query)) {
-            strncat(query, " AND timestamp BETWEEN ? AND ?", sizeof(query) - query_len - 1);
-            query_len = strlen(query);
+        if (filter->use_time_filter && remaining > 35) {
+            const char* clause = " AND timestamp BETWEEN ? AND ?";
+            strncat(query, clause, remaining);
+            remaining -= strlen(clause);
         }
-        if (filter->use_tag_filter && strlen(filter->tag_filter) > 0 && query_len + 20 < sizeof(query)) {
-            strncat(query, " AND tag LIKE ?", sizeof(query) - query_len - 1);
-            query_len = strlen(query);
+        if (filter->use_tag_filter && strlen(filter->tag_filter) > 0 && 
+            strlen(filter->tag_filter) < 60 && remaining > 20) {
+            const char* clause = " AND tag LIKE ?";
+            strncat(query, clause, remaining);
+            remaining -= strlen(clause);
         }
     }
     
     // Add LIMIT using parameter binding
-    if (query_len + 10 < sizeof(query)) {
-        strncat(query, " LIMIT ?", sizeof(query) - query_len - 1);
+    if (remaining > 10) {
+        strncat(query, " LIMIT ?", remaining);
     }
     
     int rc = sqlite3_prepare_v2(sqlite_db, query, -1, &stmt, NULL);
