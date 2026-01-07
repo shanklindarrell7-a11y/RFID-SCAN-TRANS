@@ -273,7 +273,12 @@ bool signal_processor_load(SignalProcessor* processor, const char* file_path) {
         // This is a simplified implementation
         // A complete implementation would parse the full format
         char buffer[256];
-        while(storage_file_read(file, buffer, sizeof(buffer)) > 0) {
+        size_t bytes_read;
+        
+        while((bytes_read = storage_file_read(file, buffer, sizeof(buffer) - 1)) > 0) {
+            // Ensure null termination
+            buffer[bytes_read] = '\0';
+            
             // Parse data (simplified - would need full parser)
             if(strncmp(buffer, "Data: ", 6) == 0) {
                 // Signal that data was found
@@ -450,6 +455,36 @@ const uint8_t* signal_processor_get_data(SignalProcessor* processor) {
     //   const uint8_t* data = signal_processor_get_data(processor);
     //   // ... use data ...
     //   furi_mutex_release(processor->mutex);
+    //
+    // RECOMMENDED: Use signal_processor_copy_data() instead for automatic thread safety
     
     return processor->signal_data;
+}
+
+bool signal_processor_copy_data(SignalProcessor* processor, uint8_t* buffer, size_t buffer_size, size_t* copied_size) {
+    furi_assert(processor);
+    furi_assert(buffer);
+    furi_assert(copied_size);
+    
+    furi_mutex_acquire(processor->mutex, FuriWaitForever);
+    
+    if(processor->signal_size == 0) {
+        *copied_size = 0;
+        furi_mutex_release(processor->mutex);
+        return false;
+    }
+    
+    // Copy only what fits in the buffer
+    size_t to_copy = processor->signal_size;
+    if(to_copy > buffer_size) {
+        to_copy = buffer_size;
+        FURI_LOG_W(TAG, "Buffer too small, truncating data: %zu -> %zu", processor->signal_size, to_copy);
+    }
+    
+    memcpy(buffer, processor->signal_data, to_copy);
+    *copied_size = to_copy;
+    
+    furi_mutex_release(processor->mutex);
+    
+    return true;
 }
