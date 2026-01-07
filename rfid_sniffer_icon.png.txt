@@ -1,0 +1,8 @@
+# This is a placeholder for the icon file.
+# In a real Flipper Zero application, this would be a 10x10 pixel PNG file.
+# The icon would show an RFID/wireless symbol.
+# 
+# To create the actual icon:
+# 1. Create a 10x10 pixel PNG image
+# 2. Use simple, clear iconography (antenna/waves symbol)
+# 3. Save as rfid_sniffer_icon.png
