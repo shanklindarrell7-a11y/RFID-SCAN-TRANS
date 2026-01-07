@@ -14,6 +14,16 @@
 // SQLite for efficient database management
 #include <sqlite3.h>
 
+// Helper function for safe data copying with bounds checking
+static inline size_t safe_data_copy(uint8_t* dest, size_t dest_size, 
+                                     const void* src, size_t src_size) {
+    size_t copy_size = (src_size < dest_size) ? src_size : dest_size;
+    if (copy_size > 0) {
+        memcpy(dest, src, copy_size);
+    }
+    return copy_size;
+}
+
 // Global state
 static RFIDRingBuffer* g_capture_buffer = NULL;
 static pthread_t g_capture_thread;
@@ -400,7 +410,7 @@ RFIDSignal* rfid_db_get_signal(RFIDDatabase* db, uint32_t signal_id) {
             
             const void* data = sqlite3_column_blob(stmt, 5);
             int data_size = sqlite3_column_bytes(stmt, 5);
-            memcpy(signal->data, data, data_size < RFID_SIGNAL_MAX_LENGTH ? data_size : RFID_SIGNAL_MAX_LENGTH);
+            safe_data_copy(signal->data, RFID_SIGNAL_MAX_LENGTH, data, data_size);
             
             signal->checksum = sqlite3_column_int(stmt, 6);
             
@@ -426,47 +436,56 @@ int rfid_db_get_signals_filtered(RFIDDatabase* db, const RFIDFilter* filter,
     sqlite3* sqlite_db = (sqlite3*)db->db_handle;
     sqlite3_stmt* stmt = NULL;
     
-    // Build dynamic query based on filter
-    char query[1024] = "SELECT id, timestamp, type, frequency, data_length, data, checksum, tag FROM signals WHERE 1=1";
+    // Build dynamic query based on filter using parameterized queries
+    char query[2048] = "SELECT id, timestamp, type, frequency, data_length, data, checksum, tag FROM signals WHERE 1=1";
+    int param_index = 1;
     
     if (filter) {
         if (filter->use_type_filter) {
-            char type_clause[64];
-            snprintf(type_clause, sizeof(type_clause), " AND type = %d", filter->type_filter);
-            strcat(query, type_clause);
+            strcat(query, " AND type = ?");
         }
         if (filter->use_freq_filter) {
-            char freq_clause[128];
-            snprintf(freq_clause, sizeof(freq_clause), " AND frequency BETWEEN %d AND %d", 
-                    filter->freq_min, filter->freq_max);
-            strcat(query, freq_clause);
+            strcat(query, " AND frequency BETWEEN ? AND ?");
         }
         if (filter->use_time_filter) {
-            char time_clause[128];
-            snprintf(time_clause, sizeof(time_clause), " AND timestamp BETWEEN %llu AND %llu",
-                    (unsigned long long)filter->time_start, (unsigned long long)filter->time_end);
-            strcat(query, time_clause);
+            strcat(query, " AND timestamp BETWEEN ? AND ?");
         }
         if (filter->use_tag_filter && strlen(filter->tag_filter) > 0) {
             strcat(query, " AND tag LIKE ?");
         }
     }
     
-    char limit_clause[64];
-    snprintf(limit_clause, sizeof(limit_clause), " LIMIT %u", max_results);
-    strcat(query, limit_clause);
+    // Add LIMIT using parameter binding
+    strcat(query, " LIMIT ?");
     
     int rc = sqlite3_prepare_v2(sqlite_db, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
         return -1;
     }
     
-    // Bind tag filter if needed
-    if (filter && filter->use_tag_filter && strlen(filter->tag_filter) > 0) {
-        char tag_pattern[64];
-        snprintf(tag_pattern, sizeof(tag_pattern), "%%%s%%", filter->tag_filter);
-        sqlite3_bind_text(stmt, 1, tag_pattern, -1, SQLITE_TRANSIENT);
+    // Bind parameters safely
+    param_index = 1;
+    if (filter) {
+        if (filter->use_type_filter) {
+            sqlite3_bind_int(stmt, param_index++, filter->type_filter);
+        }
+        if (filter->use_freq_filter) {
+            sqlite3_bind_int(stmt, param_index++, filter->freq_min);
+            sqlite3_bind_int(stmt, param_index++, filter->freq_max);
+        }
+        if (filter->use_time_filter) {
+            sqlite3_bind_int64(stmt, param_index++, filter->time_start);
+            sqlite3_bind_int64(stmt, param_index++, filter->time_end);
+        }
+        if (filter->use_tag_filter && strlen(filter->tag_filter) > 0) {
+            char tag_pattern[64];
+            snprintf(tag_pattern, sizeof(tag_pattern), "%%%s%%", filter->tag_filter);
+            sqlite3_bind_text(stmt, param_index++, tag_pattern, -1, SQLITE_TRANSIENT);
+        }
     }
+    
+    // Bind limit parameter
+    sqlite3_bind_int(stmt, param_index, max_results);
     
     // Allocate results array
     *results = (RFIDSignal*)calloc(max_results, sizeof(RFIDSignal));
@@ -487,7 +506,7 @@ int rfid_db_get_signals_filtered(RFIDDatabase* db, const RFIDFilter* filter,
         
         const void* data = sqlite3_column_blob(stmt, 5);
         int data_size = sqlite3_column_bytes(stmt, 5);
-        memcpy(signal->data, data, data_size < RFID_SIGNAL_MAX_LENGTH ? data_size : RFID_SIGNAL_MAX_LENGTH);
+        safe_data_copy(signal->data, RFID_SIGNAL_MAX_LENGTH, data, data_size);
         
         signal->checksum = sqlite3_column_int(stmt, 6);
         
