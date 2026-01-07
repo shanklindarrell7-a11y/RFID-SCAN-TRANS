@@ -70,6 +70,7 @@ static bool decode_awid(const uint8_t* samples, size_t sample_count, SignalData*
     // Set protocol type and name
     signal->type = PROTOCOL_AWID;
     strncpy(signal->name, "AWID", sizeof(signal->name) - 1);
+    signal->name[sizeof(signal->name) - 1] = '\0';
     
     // Parse AWID data structure
     // AWID format: Preamble + Site Code + Card Number
@@ -276,6 +277,7 @@ static bool decode_xyz(const uint8_t* samples, size_t sample_count, SignalData* 
     
     signal->type = PROTOCOL_XYZ;
     strncpy(signal->name, "XYZ Card", sizeof(signal->name) - 1);
+    signal->name[sizeof(signal->name) - 1] = '\0';
     
     // Decode Manchester to binary
     uint8_t decoded[4] = {0};

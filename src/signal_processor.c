@@ -141,8 +141,8 @@ bool process_signal(const uint8_t* samples, size_t sample_count, SignalData* sig
         }
     }
     
-    // If all else fails, use RAW decoder
-    return decode_raw(samples, sample_count, signal);
+    // Should not reach here since RAW handler (detector=NULL) should always match
+    return false;
 }
 
 size_t get_protocol_count(void) {
