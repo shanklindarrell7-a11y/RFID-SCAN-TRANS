@@ -1,0 +1,34 @@
+# Build artifacts
+*.o
+*.fap
+*.elf
+*.bin
+*.map
+dist/
+build/
+.obj/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# Compiled files
+*.so
+*.dylib
+*.dll
+
+# Debug files
+*.dSYM/
+*.pdb
+
+# Icon placeholder (use actual PNG)
+rfid_sniffer_icon.png.txt
