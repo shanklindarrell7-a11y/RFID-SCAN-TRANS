@@ -1,5 +1,5 @@
 # RFID-SCAN-TRANS
-Flipper zero app for rfid sniffing
+Flipper Zero app for RFID sniffing
 
 ## ⚠️ Legal Disclaimer
 
