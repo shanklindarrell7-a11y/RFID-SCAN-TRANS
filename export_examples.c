@@ -107,8 +107,7 @@ bool export_signal_format(
     
     // Generate file path if not provided
     if(custom_path) {
-        strncpy(file_path, custom_path, sizeof(file_path) - 1);
-        file_path[sizeof(file_path) - 1] = '\0';
+        snprintf(file_path, sizeof(file_path), "%s", custom_path);
     } else {
         // Auto-generate path with timestamp and format
         storage_common_mkdir(storage, "/ext/rfid_exports");

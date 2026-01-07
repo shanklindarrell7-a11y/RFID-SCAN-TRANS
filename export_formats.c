@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #define TAG "ExportFormats"
+#define MAX_HEX_STRING_SIZE 256
 
 // Helper function to write formatted string to file
 static bool write_formatted(File* file, const char* format, ...) {
@@ -26,6 +27,7 @@ static void data_to_hex_string(const uint8_t* data, size_t len, char* output, si
     for(size_t i = 0; i < len && pos < output_size - 3; i++) {
         pos += snprintf(output + pos, output_size - pos, "%02X", data[i]);
     }
+    output[pos] = '\0';  // Ensure null termination
 }
 
 // Get protocol name
@@ -82,7 +84,7 @@ ExportResult export_to_flipper_format(
     success = success && write_formatted(file, "Protocol: %s\n", get_protocol_name(protocol));
     
     // Write signal data as hex
-    char hex_data[256];
+    char hex_data[MAX_HEX_STRING_SIZE];
     data_to_hex_string(signal->data, signal->data_length, hex_data, sizeof(hex_data));
     success = success && write_formatted(file, "RAW_Data: %s\n", hex_data);
     
@@ -137,7 +139,7 @@ ExportResult export_to_csv_format(
     }
     
     // Convert signal data to hex string
-    char hex_data[256];
+    char hex_data[MAX_HEX_STRING_SIZE];
     data_to_hex_string(signal->data, signal->data_length, hex_data, sizeof(hex_data));
     
     // Write CSV row
@@ -194,13 +196,19 @@ ExportResult export_to_wiegand_format(
     
     // For protocols like HID Prox, extract facility code and card number
     if(protocol == RFIDProtocolHIDProx && signal->data_length >= 4) {
-        // Standard 26-bit Wiegand format
+        // Standard 26-bit Wiegand format:
+        // Bit 0: Even parity
+        // Bits 1-8: Facility code (8 bits)
+        // Bits 9-24: Card number (16 bits)
+        // Bit 25: Odd parity
         uint32_t card_data = 0;
         for(size_t i = 0; i < 4 && i < signal->data_length; i++) {
             card_data = (card_data << 8) | signal->data[i];
         }
         
+        // Extract facility code (bits 17-24, shifted right by 17)
         uint8_t facility_code = (card_data >> 17) & 0xFF;
+        // Extract card number (bits 1-16, shifted right by 1)
         uint16_t card_number = (card_data >> 1) & 0xFFFF;
         
         success = success && write_formatted(file, "Format: 26-bit\n");
@@ -222,7 +230,7 @@ ExportResult export_to_wiegand_format(
     }
     
     // Write hex representation
-    char hex_data[256];
+    char hex_data[MAX_HEX_STRING_SIZE];
     data_to_hex_string(signal->data, signal->data_length, hex_data, sizeof(hex_data));
     success = success && write_formatted(file, "Hex: %s\n", hex_data);
     
@@ -266,7 +274,7 @@ ExportResult export_to_proxmark3_format(
     success = success && write_formatted(file, "\n");
     
     // Convert data to hex string
-    char hex_data[256];
+    char hex_data[MAX_HEX_STRING_SIZE];
     data_to_hex_string(signal->data, signal->data_length, hex_data, sizeof(hex_data));
     
     // Generate protocol-specific commands
@@ -343,7 +351,7 @@ ExportResult export_to_json_format(
     bool success = true;
     
     // Convert data to hex string
-    char hex_data[256];
+    char hex_data[MAX_HEX_STRING_SIZE];
     data_to_hex_string(signal->data, signal->data_length, hex_data, sizeof(hex_data));
     
     // Write JSON structure

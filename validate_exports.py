@@ -10,6 +10,9 @@ import csv
 import sys
 from pathlib import Path
 
+# Default export directory path
+DEFAULT_EXPORT_DIR = "/ext/rfid_exports"
+
 def validate_flipper_format(file_path):
     """Validate Flipper SubGhz format (.sub)"""
     print(f"Validating Flipper format: {file_path}")
@@ -174,7 +177,7 @@ def main():
     print()
     
     # Check for test export directory
-    export_dir = Path("/ext/rfid_exports")
+    export_dir = Path(DEFAULT_EXPORT_DIR)
     
     if len(sys.argv) > 1:
         export_dir = Path(sys.argv[1])
