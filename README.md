@@ -62,6 +62,14 @@ RFID-SCAN-TRANS is a comprehensive RFID signal management system that provides p
 npm install
 ```
 
+## Quick Start
+
+Run the demo to see all features in action:
+
+```bash
+npm run demo
+```
+
 ## Usage
 
 ### Basic Usage
