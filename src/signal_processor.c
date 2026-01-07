@@ -37,6 +37,7 @@ static bool decode_em4100(const uint8_t* samples, size_t sample_count, SignalDat
     
     signal->type = PROTOCOL_EM4100;
     strncpy(signal->name, "EM4100", sizeof(signal->name) - 1);
+    signal->name[sizeof(signal->name) - 1] = '\0';
     
     // Copy raw data (simplified)
     size_t copy_size = sample_count < sizeof(signal->data) ? sample_count : sizeof(signal->data);
@@ -52,6 +53,7 @@ static bool decode_hid(const uint8_t* samples, size_t sample_count, SignalData* 
     
     signal->type = PROTOCOL_HID;
     strncpy(signal->name, "HID ProxCard", sizeof(signal->name) - 1);
+    signal->name[sizeof(signal->name) - 1] = '\0';
     
     // Copy raw data (simplified)
     size_t copy_size = sample_count < sizeof(signal->data) ? sample_count : sizeof(signal->data);
@@ -67,6 +69,7 @@ static bool decode_indala(const uint8_t* samples, size_t sample_count, SignalDat
     
     signal->type = PROTOCOL_INDALA;
     strncpy(signal->name, "Indala", sizeof(signal->name) - 1);
+    signal->name[sizeof(signal->name) - 1] = '\0';
     
     // Copy raw data (simplified)
     size_t copy_size = sample_count < sizeof(signal->data) ? sample_count : sizeof(signal->data);
@@ -82,6 +85,7 @@ static bool decode_raw(const uint8_t* samples, size_t sample_count, SignalData* 
     
     signal->type = PROTOCOL_RAW;
     strncpy(signal->name, "RAW", sizeof(signal->name) - 1);
+    signal->name[sizeof(signal->name) - 1] = '\0';
     
     // Copy raw data
     size_t copy_size = sample_count < sizeof(signal->data) ? sample_count : sizeof(signal->data);
