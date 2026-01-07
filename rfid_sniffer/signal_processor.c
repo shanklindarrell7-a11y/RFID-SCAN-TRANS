@@ -63,11 +63,18 @@ static bool signal_processor_read_rfid_signal(SignalProcessor* processor) {
     
     FURI_LOG_D(TAG, "Reading RFID signal...");
     
-    // Simulate RFID signal capture
-    // In a real implementation, this would interface with RFID hardware
+    // NOTE: This is a simulated implementation for demonstration purposes.
+    // In a production implementation, this would interface with the RFID hardware:
+    //   - Initialize RFID peripheral (furi_hal_rfid_*)
+    //   - Configure antenna and timing
+    //   - Read raw samples from ADC
+    //   - Decode based on selected protocol
+    //   - Validate signal integrity
+    
     furi_mutex_acquire(processor->mutex, FuriWaitForever);
     
-    // Generate sample data for demonstration
+    // Simulate captured data (replace with actual RFID hardware calls)
+    // Example: furi_hal_rfid_read(processor->signal_data, &processor->signal_size);
     processor->signal_size = 64; // Example: 64 bytes of data
     
     // Simulate EM4100 card ID pattern
@@ -251,12 +258,47 @@ bool signal_processor_load(SignalProcessor* processor, const char* file_path) {
     
     FURI_LOG_I(TAG, "Loading signal from: %s", file_path);
     
-    // Implementation for loading would parse the file format
-    // For now, return true to indicate the function exists
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
     
-    FURI_LOG_I(TAG, "Signal loaded successfully");
+    bool success = false;
     
-    return true;
+    if(storage_file_open(file, file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        furi_mutex_acquire(processor->mutex, FuriWaitForever);
+        
+        // Reset current data
+        processor->signal_size = 0;
+        
+        // Read file line by line and parse
+        // This is a simplified implementation
+        // A complete implementation would parse the full format
+        char buffer[256];
+        while(storage_file_read(file, buffer, sizeof(buffer)) > 0) {
+            // Parse data (simplified - would need full parser)
+            if(strncmp(buffer, "Data: ", 6) == 0) {
+                // Signal that data was found
+                processor->signal_size = 64; // Example size
+                success = true;
+                break;
+            }
+        }
+        
+        furi_mutex_release(processor->mutex);
+        storage_file_close(file);
+        
+        if(success) {
+            FURI_LOG_I(TAG, "Signal loaded successfully");
+        } else {
+            FURI_LOG_E(TAG, "Failed to parse signal data");
+        }
+    } else {
+        FURI_LOG_E(TAG, "Failed to open file for reading");
+    }
+    
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+    
+    return success;
 }
 
 bool signal_processor_clone(SignalProcessor* processor) {
@@ -402,6 +444,12 @@ size_t signal_processor_get_data_size(SignalProcessor* processor) {
 const uint8_t* signal_processor_get_data(SignalProcessor* processor) {
     furi_assert(processor);
     
-    // Note: Caller should hold lock when accessing this data
+    // WARNING: Caller must acquire mutex before calling this function
+    // and release it after finished accessing the data:
+    //   furi_mutex_acquire(processor->mutex, FuriWaitForever);
+    //   const uint8_t* data = signal_processor_get_data(processor);
+    //   // ... use data ...
+    //   furi_mutex_release(processor->mutex);
+    
     return processor->signal_data;
 }
