@@ -1,0 +1,16 @@
+App(
+    appid="rfid_scan_trans",
+    name="RFID Scan Trans",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rfid_scan_trans_app",
+    requires=[
+        "subghz",
+        "gui",
+        "storage",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="rfid_scan_trans.png",
+    fap_category="Sub-GHz",
+    fap_icon_assets="assets",
+)
