@@ -1,0 +1,24 @@
+{
+  "name": "rfid-scan-trans",
+  "version": "1.0.0",
+  "description": "Flipper Zero app for RFID sniffing with signal storage and transmission",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node src/index.js",
+    "lint": "eslint src tests"
+  },
+  "keywords": [
+    "rfid",
+    "flipper-zero",
+    "security",
+    "signal-processing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "eslint": "^8.40.0"
+  }
+}
