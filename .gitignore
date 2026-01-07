@@ -1,0 +1,42 @@
+# Build artifacts
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+rfid_scan_trans
+
+# Build directories
+build/
+dist/
+.fbt/
+.sconsign.dblite
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Dependencies
+node_modules/
+.npm
+
+# Temporary files
+/tmp/
+*.tmp
+*.bak
+*.log
