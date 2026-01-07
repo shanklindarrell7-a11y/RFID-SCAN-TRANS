@@ -1,0 +1,31 @@
+# Build artifacts
+build/
+.fap/
+*.fap
+*.elf
+*.bin
+*.hex
+*.lst
+*.map
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependencies
+*.d
+*.o
+
+# Test files
+test_output/
+*.test
+
+# Export test files (for development)
+/ext/rfid_exports/test_*
+
+# Logs
+*.log
