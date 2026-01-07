@@ -1,0 +1,4 @@
+id,timestamp,signal_type,frequency,protocol,raw_data,decoded_data,tag_id,file_path,notes,category,favorite
+1,2026-01-07T09:00:00Z,EM4100,125.0,EM-Marin,0F0368FA8B,,0368FA8B,/ext/rfid_signals/capture_20260107_090000.sub,Office door tag,Access Control,true
+2,2026-01-07T10:30:00Z,HID,125.0,HID Prox,2006EC9A5E,12345,EC9A5E,/ext/rfid_signals/capture_20260107_103000.sub,Parking garage,Access Control,false
+3,2026-01-07T11:45:00Z,EM4100,125.0,EM-Marin,0F0412CD9A,,0412CD9A,/ext/rfid_signals/capture_20260107_114500.sub,Lab equipment tag,Asset Tracking,false
