@@ -1,0 +1,8 @@
+# Wiegand Format Export
+# Protocol: HID Prox
+# Frequency: 125 kHz
+
+Format: 26-bit
+Facility Code: 123
+Card Number: 45678
+Hex: 12345678

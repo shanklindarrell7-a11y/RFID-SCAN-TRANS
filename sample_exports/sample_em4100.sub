@@ -1,0 +1,8 @@
+Filetype: Flipper SubGhz RAW File
+Version: 1
+Frequency: 125
+Preset: FuriHalSubGhzPresetOok650Async
+Protocol: EM4100
+RAW_Data: A1B2C3D4E5
+RSSI: -45
+Timestamp: 1704627600

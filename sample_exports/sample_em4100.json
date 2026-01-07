@@ -1,0 +1,15 @@
+{
+  "protocol": "EM4100",
+  "frequency_khz": 125,
+  "timestamp": 1704627600,
+  "rssi_dbm": -45,
+  "data": {
+    "hex": "A1B2C3D4E5",
+    "length": 5,
+    "bytes": [161, 178, 195, 212, 229]
+  },
+  "metadata": {
+    "source": "Flipper Zero RFID Sniffer",
+    "version": "1.0"
+  }
+}
