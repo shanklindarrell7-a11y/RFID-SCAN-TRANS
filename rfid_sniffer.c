@@ -31,6 +31,10 @@ static volatile bool g_capture_running = false;
 static RFIDPerformanceMetrics g_metrics = {0};
 static pthread_mutex_t g_metrics_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+// Counters for proper average calculation
+static uint32_t g_capture_count = 0;
+static uint32_t g_storage_count = 0;
+
 // Timer utility for performance measurement
 static inline uint64_t get_time_microseconds(void) {
     struct timespec ts;
@@ -67,14 +71,18 @@ void rfid_ringbuffer_destroy(RFIDRingBuffer* rb) {
 }
 
 bool rfid_ringbuffer_is_empty(RFIDRingBuffer* rb) {
+    if (!rb) return true;  // Treat null as empty
     return rb->head == rb->tail;
 }
 
 bool rfid_ringbuffer_is_full(RFIDRingBuffer* rb) {
+    if (!rb) return true;  // Treat null as full
     return ((rb->head + 1) % rb->capacity) == rb->tail;
 }
 
 bool rfid_ringbuffer_push(RFIDRingBuffer* rb, const RFIDSignal* signal) {
+    if (!rb || !signal) return false;
+    
     if (rfid_ringbuffer_is_full(rb)) {
         return false;
     }
@@ -86,6 +94,8 @@ bool rfid_ringbuffer_push(RFIDRingBuffer* rb, const RFIDSignal* signal) {
 }
 
 bool rfid_ringbuffer_pop(RFIDRingBuffer* rb, RFIDSignal* signal) {
+    if (!rb || !signal) return false;
+    
     if (rfid_ringbuffer_is_empty(rb)) {
         return false;
     }
@@ -319,8 +329,11 @@ int rfid_db_store_signal(RFIDDatabase* db, const RFIDSignal* signal) {
     
     pthread_mutex_lock(&g_metrics_mutex);
     g_metrics.signals_stored++;
+    g_storage_count++;
+    // Proper running average calculation
+    uint64_t latency = end_time - start_time;
     g_metrics.avg_storage_latency_us = 
-        (g_metrics.avg_storage_latency_us + (end_time - start_time)) / 2;
+        (g_metrics.avg_storage_latency_us * (g_storage_count - 1) + latency) / g_storage_count;
     pthread_mutex_unlock(&g_metrics_mutex);
     
     return 0;
@@ -438,25 +451,32 @@ int rfid_db_get_signals_filtered(RFIDDatabase* db, const RFIDFilter* filter,
     
     // Build dynamic query based on filter using parameterized queries
     char query[2048] = "SELECT id, timestamp, type, frequency, data_length, data, checksum, tag FROM signals WHERE 1=1";
+    size_t query_len = strlen(query);
     int param_index = 1;
     
     if (filter) {
-        if (filter->use_type_filter) {
-            strcat(query, " AND type = ?");
+        if (filter->use_type_filter && query_len + 20 < sizeof(query)) {
+            strncat(query, " AND type = ?", sizeof(query) - query_len - 1);
+            query_len = strlen(query);
         }
-        if (filter->use_freq_filter) {
-            strcat(query, " AND frequency BETWEEN ? AND ?");
+        if (filter->use_freq_filter && query_len + 35 < sizeof(query)) {
+            strncat(query, " AND frequency BETWEEN ? AND ?", sizeof(query) - query_len - 1);
+            query_len = strlen(query);
         }
-        if (filter->use_time_filter) {
-            strcat(query, " AND timestamp BETWEEN ? AND ?");
+        if (filter->use_time_filter && query_len + 35 < sizeof(query)) {
+            strncat(query, " AND timestamp BETWEEN ? AND ?", sizeof(query) - query_len - 1);
+            query_len = strlen(query);
         }
-        if (filter->use_tag_filter && strlen(filter->tag_filter) > 0) {
-            strcat(query, " AND tag LIKE ?");
+        if (filter->use_tag_filter && strlen(filter->tag_filter) > 0 && query_len + 20 < sizeof(query)) {
+            strncat(query, " AND tag LIKE ?", sizeof(query) - query_len - 1);
+            query_len = strlen(query);
         }
     }
     
     // Add LIMIT using parameter binding
-    strcat(query, " LIMIT ?");
+    if (query_len + 10 < sizeof(query)) {
+        strncat(query, " LIMIT ?", sizeof(query) - query_len - 1);
+    }
     
     int rc = sqlite3_prepare_v2(sqlite_db, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
@@ -617,8 +637,11 @@ static void* capture_thread_func(void* arg) {
         
         pthread_mutex_lock(&g_metrics_mutex);
         g_metrics.signals_captured++;
+        g_capture_count++;
+        // Proper running average calculation
+        uint64_t latency = end_time - start_time;
         g_metrics.avg_capture_latency_us = 
-            (g_metrics.avg_capture_latency_us + (end_time - start_time)) / 2;
+            (g_metrics.avg_capture_latency_us * (g_capture_count - 1) + latency) / g_capture_count;
         pthread_mutex_unlock(&g_metrics_mutex);
         
         signal_counter++;
@@ -971,6 +994,8 @@ void rfid_get_performance_metrics(RFIDPerformanceMetrics* metrics) {
 void rfid_reset_performance_metrics(void) {
     pthread_mutex_lock(&g_metrics_mutex);
     memset(&g_metrics, 0, sizeof(g_metrics));
+    g_capture_count = 0;
+    g_storage_count = 0;
     pthread_mutex_unlock(&g_metrics_mutex);
 }
 
