@@ -33,3 +33,7 @@ Thumbs.db
 # Temporary files
 /tmp/
 *.tmp
+
+# Node.js artifacts (not used, but prevent accidental commits)
+node_modules/
+package-lock.json
