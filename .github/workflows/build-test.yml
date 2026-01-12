@@ -18,18 +18,24 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up FlipperZero SDK
+      - name: Set up Build Dependencies
         run: |
-          sudo apt update
-          sudo apt install -y build-essential clang \
-            gcc-arm-none-eabi libnewlib-arm-none-eabi
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc libsqlite3-dev
 
       - name: Build Application
         run: |
-          make
+          make all
+
+      - name: Run Tests
+        run: |
+          make test
 
       - name: Archive Build Artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: rfid_sniffer_build
-          path: build/
+          path: |
+            librfid_sniffer.a
+            rfid_example
